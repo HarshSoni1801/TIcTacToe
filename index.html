@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Document</title>
+   <style>
+      *{
+         margin: 0;
+         padding: 0;
+         box-sizing: border-box;
+      }
+      body{
+         font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+         height: 100vh;
+         width: 100vw;
+         background-image: url(./background.jpg);
+         display: grid;
+         grid-template-columns: 0.75fr auto 0.75fr;
+         gap: 0px;
+      }
+      #center{
+         display: flex;
+         align-items: center;
+         justify-content: center;
+      }
+      #gamebox{
+         font-size: 2rem;
+         background-color: rgb(205, 206, 255);
+         padding: 40px;
+         text-align: center;
+         border-radius: 20px;
+         box-shadow: 0px 0px 10px black;
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+      }
+      #innerbox{
+         margin-top: 50px;
+         display: grid;
+         grid-template-columns: repeat(3,1fr);
+         gap: 5px;
+      }
+      .cells{
+         background-color: aliceblue;
+         height: 120px;
+         width: 120px;
+         border: 2px solid rgb(156, 155, 155);
+         border-radius: 10px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         font-size: 100px;
+      }
+      .cells:hover{
+         cursor: pointer;
+         background-color: rgb(221, 231, 237);
+      }
+      #left,#right{
+         display: flex;
+         align-items: center;
+         justify-content: center;
+      }
+      #p1,#p2{
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+         font-size: 1.5rem;
+         opacity: 1;
+         transition: opacity 0.2s linear, transform 0.1s linear;
+         overflow: hidden;
+      }
+      #p1 img, #p2 img{
+         width: 60%;
+      }
+      #gamebox button{
+         height: 40px;
+         width: 50%;
+         margin-top: 40px;
+         background-color:rgb(41, 156, 250);
+         border: 0;
+         font-size: 1.3rem;
+         border-radius:10px;
+      }
+      #gamebox button:hover{
+         cursor: pointer;
+         box-shadow: 0px 0px 10px black;
+      }
+   </style>
+</head>
+<body>
+   <div id="left">
+      <div id="p1">
+         <h1 id="turnIndicatorP1">Your Turn</h1>
+         <h2>Player 1</h2>
+         <img src="./Captain America.png" alt="CaptainAmericSticker" id="Player1">
+      </div>
+   </div>
+   <div id="center">
+      <div id="gamebox">
+         <h1 id="result">Tic-Tac-Toe</h1>
+         <div id="innerbox">
+            <div class="cells" id="0"></div>
+            <div class="cells" id="1"></div>
+            <div class="cells" id="2"></div>
+            <div class="cells" id="3"></div>
+            <div class="cells" id="4"></div>
+            <div class="cells" id="5"></div>
+            <div class="cells" id="6"></div>
+            <div class="cells" id="7"></div>
+            <div class="cells" id="8"></div>
+         </div>
+         <button id="restart_btn">Restart</button>
+      </div>
+   </div>
+   <div id="right">
+      <div id="p2">
+         <h1 id="turnIndicatorP2">Your Turn</h1>
+         <h2>Player 2</h2>
+         <img src="./IronMan.png" alt="IronManSticker" id="Player2">
+      </div>
+   </div>
+</body>
+<script>
+   const P1=document.getElementById('p1')
+   const P2=document.getElementById('p2')
+   const p1_head=document.getElementById('turnIndicatorP1')
+   const p2_head=document.getElementById('turnIndicatorP2')
+   const p1_side=document.getElementById('left')
+   const p2_side=document.getElementById('right')
+   const p_centre=document.getElementById('center')
+   const GAME=document.getElementById('innerbox')
+   const result=document.getElementById('result')
+   let turn='';
+   let winner_combinations=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[6,4,2]]
+   let currpositions=new Array(9).fill('E')
+   let total_turns=0
+   const Restart=document.getElementById('restart_btn')
+   function random_turn()
+   {
+      let randturn=Math.floor(Math.random()*2)
+      if(randturn===0) 
+      {
+         P2.style.opacity='0';
+         return 'X';
+      }
+      else
+      {
+         P1.style.opacity='0';
+         return 'O';
+      }
+   }
+   function change(turn)
+   {
+      if(turn==='X')
+      {
+         P1.style.opacity='0';
+         P2.style.opacity='1';
+         return 'O';
+      }
+      else
+      {
+         P1.style.opacity='1';
+         P2.style.opacity='0';
+         return 'X';
+      }
+   }
+   function checkwinner(arr)
+   {
+      for(let [index0,index1,index2] of arr)
+      {
+         if(currpositions[index0]!='E' && currpositions[index0]==currpositions[index1] && currpositions[index0]==currpositions[index2])
+            return true;
+      }
+      return false;
+   }
+   function findaction(event)
+   {
+      console.log(turn)
+      const CELL=event.target
+      if(currpositions[CELL.id]==='E')
+      {
+         total_turns++;
+         CELL.innerText=turn
+         currpositions[CELL.id]=turn;
+         if(checkwinner(winner_combinations))
+         {
+            if(turn==='X')
+            {
+               result.innerText=("Winner : Player 1");
+               p1_head.innerText="WINNER"
+               p2_side.style.backgroundColor='black'
+               p_centre.style.backgroundColor='black'
+               let scale=true
+               setInterval(()=>{
+                  if(scale)
+                     P1.style.transform= 'scale(1.25)';
+                  else
+                     P1.style.transform= 'scale(1)';
+                  scale=!scale;
+
+               },500)
+            }
+            else
+            {
+               result.innerText=("Winner : Player 2");
+               p2_head.innerText="WINNER"
+               p1_side.style.backgroundColor='black'
+               p_centre.style.backgroundColor='black'
+               let scale=true
+               setInterval(()=>{
+                  if(scale)
+                     P2.style.transform= 'scale(1.25)';
+                  else
+                     P2.style.transform= 'scale(1)';
+                  scale=!scale;
+               },500)
+            }
+            GAME.removeEventListener('click',findaction)
+            return;
+         }
+         turn=change(turn)
+      }
+      if(total_turns==9)
+      {
+         P1.style.opacity='0';
+         P2.style.opacity='0';
+         p1_side.style.backgroundColor='black'
+         p_centre.style.backgroundColor='black'
+         p2_side.style.backgroundColor='black'
+         result.innerText=("DRAW");
+         return;
+      }
+   }
+   GAME.addEventListener('click',findaction)
+   turn=random_turn()
+   Restart.addEventListener('click',()=>{location.reload();})
+</script>
+</html>
